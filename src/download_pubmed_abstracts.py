@@ -44,6 +44,7 @@ def write_to_file(pmid_list, categories, fieldnames, writer):
 		grant_ids = []
 		grant_agencies = []
 		grant_countries = []
+
 		for grant in grant_list:
 			if 'GrantID' in grant:
 				grant_ids.append(grant['GrantID'])
@@ -63,6 +64,7 @@ def write_to_file(pmid_list, categories, fieldnames, writer):
 		row['GrantIDs'] = "::".join(grant_ids)
 		row['Agencies'] = "::".join(grant_agencies)
 		row['Countries'] = "::".join(grant_countries)
+		row["PMID"] = pmid_list[i]
 
 		writer.writerow(row)
 
@@ -71,10 +73,9 @@ def write_to_file(pmid_list, categories, fieldnames, writer):
 if __name__ == "__main__":
 	
 	categories = {'BACKGROUND':0, 'RESULTS':1,'CONCLUSIONS':2}
-	fieldnames = ['Abstract', 'GrantIDs', 'Agencies', 'Countries']
+	fieldnames = ['Abstract', 'GrantIDs', 'Agencies', 'Countries', 'PMID']
 	csvfile = open('../data/researchfunding.csv', 'a')
 	writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
 
 	with open('../data/humanstudypmids.txt', 'r') as f:
 		pmid_list = f.readlines()
