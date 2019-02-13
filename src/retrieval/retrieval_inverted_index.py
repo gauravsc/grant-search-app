@@ -3,15 +3,20 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-def process_query(inverted_idx, query, english_stopwords, topk=10):
-	query_words = word_tokenize(query)
-	query_words = [word for word in query_words if word not in english_stopwords]
+# To process query and clean it up before being fed to the retriever function
+def process_query(query):
+	query = word_tokenize(query)
+	query = [word.lower() for word in query if word not in english_stopwords]
 
-	if len(query_words) == 0:
+	return query
+
+
+def retrieve_query_results(inverted_idx, query, english_stopwords, topk=10):
+	if len(query) == 0:
 		return []
 
 	pmids = []
-	for word in query_words:
+	for word in query:
 		pmids += inverted_idx[word]
 
 	res_cnt = {}
@@ -26,18 +31,21 @@ def process_query(inverted_idx, query, english_stopwords, topk=10):
 
 	return res
 
-
 if __name__ == "__main__":
 	
 	# Declaring and loading some global variables	
 	path = '../data/inverted_idx.json'
+	
 	english_stopwords = stopwords.words('english')
 	inverted_idx = json.load(open(path, 'r')) 
 
 	# Testing the query retrieval function
 	# query = "evaluate the role of the splanchnic bed in epinephrine-induced glucose intolerance"
 	query = "psychosocial experiences of women with breast cancer across the lifespan"
-	results_of_query = process_query(inverted_idx, query, english_stopwords)
+	
+	query = process_query(query)
+
+	results_of_query = retrieve_query_results(inverted_idx, query, english_stopwords)
 
 	print (results_of_query[:7])
 

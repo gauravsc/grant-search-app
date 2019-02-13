@@ -11,7 +11,7 @@ def create_index(csvreader, file):
 	
 	for row in csvreader:
 		word_list = word_tokenize(row[0])
-		word_list = [word for word in word_list if word not in english_stopwords]
+		word_list = [word.lower() for word in word_list if word not in english_stopwords]
 		
 		pmid = row[-1]
 
