@@ -32,7 +32,6 @@ def fetch_abstract(pmids):
 
 	return articles
 
-
 # Convert to datetime object
 def convert_to_date_object(date_dict):
 	date_obj = dt.datetime(int(str(date_dict['Year'])), int(str(date_dict['Month'])), int(str(date_dict['Day'])), 0, 0)
@@ -96,7 +95,7 @@ if __name__ == '__main__':
 	pmids_to_extract = list(set(pmids).difference(set(pmids_already_extracted)))
 
 	i = 0
-	while i < len(pmids):
+	while i < len(pmids_to_extract):
 		write_to_database(pmids[i:i+request_size], collection)
 		print ("# docs processed: ", i)
 		i += request_size
