@@ -33,7 +33,6 @@ if __name__ == "__main__":
 	pmid_to_index = list(set(pmids).difference(set(pmids_already_indexed)))
 
 	for pmid in pmid_to_index:
-		print(pmid)
 		try:
 			rec = collection_pubmed.find_one({"PMID": pmid})[0]
 		except KeyError:

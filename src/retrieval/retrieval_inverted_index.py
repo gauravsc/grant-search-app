@@ -1,3 +1,7 @@
+import pymongo
+from pymongo import MongoClient
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 import json
 import nltk
 from nltk.tokenize import word_tokenize
@@ -11,13 +15,13 @@ def process_query(query):
 	return query
 
 
-def retrieve_query_results(inverted_idx, query, english_stopwords, topk=10):
+def retrieve_query_results(collection, query, topk=10):
 	if len(query) == 0:
 		return []
 
 	pmids = []
 	for word in query:
-		pmids += inverted_idx[word]
+		pmids += [rec["PMID"] for rec in collection.find({"word":word})]
 
 	res_cnt = {}
 	for pmid in pmids:
@@ -32,20 +36,21 @@ def retrieve_query_results(inverted_idx, query, english_stopwords, topk=10):
 	return res
 
 if __name__ == "__main__":
-	
-	# Declaring and loading some global variables	
-	path = '../data/inverted_idx.json'
-	
+	# Load the list of english stopwords
 	english_stopwords = stopwords.words('english')
-	inverted_idx = json.load(open(path, 'r')) 
 
+	# Establishing database connection
+	client = MongoClient('localhost', 27017)
+	db = client['grant_search']
+	collection_index = db['pubmed_index']
+		
 	# Testing the query retrieval function
 	# query = "evaluate the role of the splanchnic bed in epinephrine-induced glucose intolerance"
 	query = "psychosocial experiences of women with breast cancer across the lifespan"
 	
 	query = process_query(query)
 
-	results_of_query = retrieve_query_results(inverted_idx, query, english_stopwords)
+	results_of_query = retrieve_query_results(collection_index, query)
 
 	print (results_of_query[:7])
 
