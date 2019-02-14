@@ -80,7 +80,7 @@ if __name__ == "__main__":
 	with open('../data/humanstudypmids.txt', 'r') as f:
 		pmid_list = f.readlines()
 		pmid_list = [pmid.strip() for pmid in pmid_list]
-
+	
 	# write all the pertinent content to the file
 	if os.path.isfile('../data/index.pkl'):
 		i = int(pickle.load(open('../data/index.pkl','rb')))

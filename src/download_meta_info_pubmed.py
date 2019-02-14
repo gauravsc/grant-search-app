@@ -67,6 +67,10 @@ def extract_PMID():
 	for row in csvreader:
 		pmid_list.append(row[-1])
 
+
+	pmid_list = list(set(pmid_list))
+	json.dump(pmid_list, open('../data/human_studies_PMID.json', 'w'))
+
 	return pmid_list
 
 
