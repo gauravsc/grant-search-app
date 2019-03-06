@@ -1,4 +1,6 @@
 ./data/*
 ./saved_models/*
 *.json
+*.xml
+*.csv
 .DS_Store

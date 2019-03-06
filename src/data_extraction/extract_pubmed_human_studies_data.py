@@ -88,7 +88,7 @@ if __name__ == '__main__':
 	db = client['grant_search']
 	collection = db['pubmed_info']
 
-	pmids = json.load(open('../data/human_studies_PMID.json','r'))
+	pmids = json.load(open('../data/human_studies_pubmed/human_studies_PMID.json','r'))
 
 	pmids_already_extracted = [rec['PMID'] for rec in collection.find({}, { "_id": 0, "PMID": 1})]
 
