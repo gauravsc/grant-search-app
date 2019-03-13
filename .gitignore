@@ -4,4 +4,5 @@
 *.json
 *.xml
 *.csv
+*.json
 .DS_Store
