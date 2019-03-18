@@ -12,19 +12,26 @@ def create_index(abstract_text, _id, table_name):
 	word_list = word_tokenize(abstract_text)
 	word_list = [word.lower() for word in word_list if word not in english_stopwords]
 	
-	rows = []
+	temp_inv_idx = defaultdict(list)
 	for word in word_list:
-		rows.append({"_id_original":_id, "word": word, 'table_name':table_name})
+		temp_inv_idx[word].append((_id, table_name))
 
-	return rows
+	return temp_inv_idx
+
+
+def update_inverted_index(collection_index, temp_inv_idx):
+	words_to_update = temp_inv_idx.keys()
+
+	for word in words_to_update:
+		rec = collection_index.find_one({'word':word})
+		if rec is None:
+			collection_index.insert_one({'word':word, 'index_list':temp_inv_idx[word]})
+		else:
+			collection_index.replace_one({'word':word}, {'word':word, 'index_list':temp_inv_idx[word]+rec['index_list']})
 
 
 def index_pubmed_text(db, collection_index):
 	collection_pubmed = db['pubmed_info']
-
-	# _ids = [rec['_id'] for rec in collection_pubmed.find({}, { "_id": 0, "PMID": 1})]
-	# _ids_already_indexed = [rec['_id'] for rec in collection_index.find({},{ "_id": 0, "PMID": 1})]
-	# _ids_to_index = list(set(_ids).difference(set(_ids_already_indexed)))
 
 	_ids_to_index = [rec['_id'] for rec in collection_pubmed.find({}, { "_id": 1})]
 
@@ -36,9 +43,8 @@ def index_pubmed_text(db, collection_index):
 			print ("key error continuing ...")
 			continue
 
-		rows = create_index(abstract_text, _id, 'pubmed_info')
-		if len(rows) > 0:
-			collection_index.insert_many(rows)
+		temp_inv_idx = create_index(abstract_text, _id, 'pubmed_info')
+		update_inverted_index(collection_index, temp_inv_idx)
 
 
 def index_NIHRIO_text(db, collection_index):
@@ -53,9 +59,8 @@ def index_NIHRIO_text(db, collection_index):
 		except KeyError:
 			continue
 		
-		rows = create_index(abstract_text, _id, 'nihrio_info')
-		if len(rows) > 0:
-			collection_index.insert_many(rows)
+		temp_inv_idx = create_index(abstract_text, _id, 'nihrio_info')
+		update_inverted_index(collection_index, temp_inv_idx)
 
 
 def index_NIHR_text(db, collection_index):
@@ -70,9 +75,8 @@ def index_NIHR_text(db, collection_index):
 		except KeyError:
 			continue
 		
-		rows = create_index(abstract_text, _id, 'nihr_info')
-		if len(rows) > 0:
-			collection_index.insert_many(rows)
+		temp_inv_idx = create_index(abstract_text, _id, 'nihr_info')
+		update_inverted_index(collection_index, temp_inv_idx)
 
 
 def index_NLM_text(db, collection_index):
@@ -87,9 +91,8 @@ def index_NLM_text(db, collection_index):
 		except KeyError:
 			continue
 		
-		rows = create_index(abstract_text, _id, 'clinical_trials_NLM_info')
-		if len(rows) > 0:
-			collection_index.insert_many(rows)
+		temp_inv_idx = create_index(abstract_text, _id, 'clinical_trials_NLM_info')
+		update_inverted_index(collection_index, temp_inv_idx)
 
 if __name__ == "__main__":
 	# Load english stopwords
@@ -100,15 +103,15 @@ if __name__ == "__main__":
 	db = client['grant_search']
 	collection_index = db['inverted_index']
 
-	collection_index.create_index([('word', pymongo.DESCENDING)])
-	# create inverted index on pubmed info
-	# index_pubmed_text(db, collection_index)
+	collection_index.create_index([('word', pymongo.DESCENDING)], unique=True)
+	# # create inverted index on pubmed info
+	index_pubmed_text(db, collection_index)
 	# # create inverted index on nihrio info
-	# index_NIHRIO_text(db, collection_index)
+	index_NIHRIO_text(db, collection_index)
 	# # create inverted index on nihr info
-	# index_NIHR_text(db, collection_index)
+	index_NIHR_text(db, collection_index)
 	# # create inverted index on nlm info
-	# index_NLM_text(db, collection_index)
+	index_NLM_text(db, collection_index)
 
 
 

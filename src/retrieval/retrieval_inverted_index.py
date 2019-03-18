@@ -21,7 +21,9 @@ def retrieve_query_results(collection, query, topk=10):
 
 	ids_table_names = []
 	for word in query:
-		ids_table_names += [(rec['_id_original'], rec['table_name']) for rec in collection.find({"word":word})]
+		rec = collection.find_one({"word":word})
+		if rec is not None:
+			ids_table_names += rec['index_list']
 
 	print ("Done with extracting data from database")
 	res_cnt = {}
