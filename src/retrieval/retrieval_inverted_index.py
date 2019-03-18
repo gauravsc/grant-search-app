@@ -19,21 +19,27 @@ def retrieve_query_results(collection, query, topk=10):
 	if len(query) == 0:
 		return []
 
-	pmids = []
+	ids_table_names = []
 	for word in query:
-		pmids += [rec["PMID"] for rec in collection.find({"word":word})]
+		ids_table_names += [(rec['_id_original'], rec['table_name']) for rec in collection.find({"word":word})]
 
+	print ("Done with extracting data from database")
 	res_cnt = {}
-	for pmid in pmids:
-		if pmid not in res_cnt:
-			res_cnt[pmid] = 1
+	for id_table_name in ids_table_names:
+		if id_table_name not in res_cnt:
+			res_cnt[id_table_name] = 1
 		else:
-			res_cnt[pmid] += 1
+			res_cnt[id_table_name] += 1
+
+	print ("Done with counting")
 
 	res = sorted(res_cnt.items(), key=lambda kv: kv[1], reverse=True)
-	res = [pmid for pmid, cnt in res[:topk]]
+	res = [id_table_name for id_table_name, cnt in res[:topk]]
+
+	print("Done with sorting")
 
 	return res
+
 
 if __name__ == "__main__":
 	# Load the list of english stopwords
@@ -42,7 +48,7 @@ if __name__ == "__main__":
 	# Establishing database connection
 	client = MongoClient('localhost', 27017)
 	db = client['grant_search']
-	collection_index = db['pubmed_index']
+	collection_index = db['inverted_index']
 		
 	# Testing the query retrieval function
 	# query = "evaluate the role of the splanchnic bed in epinephrine-induced glucose intolerance"

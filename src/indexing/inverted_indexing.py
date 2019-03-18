@@ -9,10 +9,10 @@ import json
 
 # Create inverted index of the words
 def create_index(abstract_text, _id, table_name):
-	rows = []
 	word_list = word_tokenize(abstract_text)
 	word_list = [word.lower() for word in word_list if word not in english_stopwords]
 	
+	rows = []
 	for word in word_list:
 		rows.append({"_id_original":_id, "word": word, 'table_name':table_name})
 
@@ -54,7 +54,7 @@ def index_NIHRIO_text(db, collection_index):
 			continue
 		
 		rows = create_index(abstract_text, _id, 'nihrio_info')
-		if len(row) > 0:
+		if len(rows) > 0:
 			collection_index.insert_many(rows)
 
 
@@ -100,14 +100,15 @@ if __name__ == "__main__":
 	db = client['grant_search']
 	collection_index = db['inverted_index']
 
+	collection_index.create_index([('word', pymongo.DESCENDING)])
 	# create inverted index on pubmed info
-	index_pubmed_text(db, collection_index)
-	# create inverted index on nihrio info
-	index_NIHRIO_text(db, collection_index)
-	# create inverted index on nihr info
-	index_NIHR_text(db, collection_index)
-	# create inverted index on nlm info
-	index_NLM_text(db, collection_index)
+	# index_pubmed_text(db, collection_index)
+	# # create inverted index on nihrio info
+	# index_NIHRIO_text(db, collection_index)
+	# # create inverted index on nihr info
+	# index_NIHR_text(db, collection_index)
+	# # create inverted index on nlm info
+	# index_NLM_text(db, collection_index)
 
 
 
