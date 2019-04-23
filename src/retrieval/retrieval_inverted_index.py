@@ -20,20 +20,31 @@ def retrieve_query_results(collection, query, topk=10):
 		return []
 
 	ids_table_names = []
-	for word in query:
-		rec = collection.find_one({"word":word})
-		if rec is not None:
-			ids_table_names += rec['index_list']
-
-	print ("Done with extracting data from database")
 	res_cnt = {}
-	for id_table_name in ids_table_names:
-		if id_table_name not in res_cnt:
-			res_cnt[id_table_name] = 1
-		else:
-			res_cnt[id_table_name] += 1
 
-	print ("Done with counting")
+	for word in query:
+		records = collection.find({"word":word})
+		for rec in records:
+			if rec is not None:
+				ids_table_names = rec['index_list']
+				ids_table_names = map(tuple, ids_table_names)
+
+				for id_table_name in ids_table_names:
+					if id_table_name not in res_cnt:
+						res_cnt[id_table_name] = 1
+					else:
+						res_cnt[id_table_name] += 1
+
+
+	# print ("Done with extracting data from database")
+	# res_cnt = {}
+	# for id_table_name in ids_table_names:
+	# 	if id_table_name not in res_cnt:
+	# 		res_cnt[id_table_name] = 1
+	# 	else:
+	# 		res_cnt[id_table_name] += 1
+
+	# print ("Done with counting")
 
 	res = sorted(res_cnt.items(), key=lambda kv: kv[1], reverse=True)
 	res = [id_table_name for id_table_name, cnt in res[:topk]]
