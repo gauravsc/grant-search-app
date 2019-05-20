@@ -11,3 +11,5 @@ from nltk.corpus import stopwords
 class RetrieveBertIndex:
 	self __init__(self):
 		
+
+	self 		
