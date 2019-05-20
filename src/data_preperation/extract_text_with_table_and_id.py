@@ -15,7 +15,7 @@ def extract_pubmed_human_studies_data(collection, writer):
 		except KeyError:
 			pass
 
-	return text_info
+	return None
 
 def extract_NLM_clinical_trials_data(collection, writer):
 	records = collection.find({}, {'clinical_study.brief_summary':1, '_id':1})
@@ -28,7 +28,7 @@ def extract_NLM_clinical_trials_data(collection, writer):
 		except KeyError:
 			pass
 
-	return text_info
+	return None
 
 def extract_NIHRIO_data(collection, writer):
 	records = collection.find({},{'objective':1, '_id':1})
@@ -38,7 +38,7 @@ def extract_NIHRIO_data(collection, writer):
 		_id = record['_id']
 		writer.writerow({'abstract': abstract, '_id':_id, 'table':'nihrio_info'})
 
-	return text_info
+	return None
 
 def extract_NIHR_data(collection, writer):
 	records = collection.find({},{'fields.plain_english_abstract':1})
@@ -51,7 +51,7 @@ def extract_NIHR_data(collection, writer):
 		except KeyError:
 			pass
 
-	return text_info
+	return None
 
 if __name__ == '__main__':
 	# File to save the extracted abstracts
