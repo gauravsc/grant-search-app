@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from pymongo import MongoClient
 from pytorch_pretrained_bert import BertTokenizer
 from models.bert_based.Models import BERTCLassifierModel
+from utils.NNSearch import NNSearch
 
 class RetrieveBertIndex:
 	def __init__(self):
@@ -28,6 +29,8 @@ class RetrieveBertIndex:
 		self.d_word_vec = 200
 		self.dropout = 0.1
 		self.learning_rate = 0.005
+
+		self.nn_search = NNSearch('../processed_data/vector_representations/')
 
 		print ("Starting to load the saved model .....")
 		self.model = BERTCLassifierModel(self.n_tgt_vocab, dropout=self.dropout)
@@ -59,20 +62,11 @@ class RetrieveBertIndex:
 
 		return encoder_output[0]
 
-
-	def extract_nearest_neighbours(self, bert_vector, path):
-		files = os.listdir(path); best_results = []
-		for file in files:
-			records = json.load(open(path+file,'r'))
-			for record in records:
-						
-
-
-
 	def retrieve_query_results(self, query, topk=10):
-		path = '../processed_data/vector_representations/'
 		qu_bert_vec = self.extract_bert_vector([query])
-		nn_result = self.extract_nearest_neighbours(qu_bert_vec, path)
+		nn_result = self.extract_nearest_neighbours(qu_bert_vec, topk=topk)
+
+		return nn_result
 
 
 
