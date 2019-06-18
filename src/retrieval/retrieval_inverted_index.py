@@ -15,19 +15,19 @@ class RetrieveInvertedIndex:
 
 		# Establishing database connection
 		self.client = MongoClient('localhost', 27017)
-		self.db = client['grant_search']
-		self.collection_index = db['inverted_index']
+		self.db = self.client['grant_search']
+		self.collection_index = self.db['inverted_index']
 
 	# To process query and clean it up before being fed to the retriever function
 	def process_query(self, query):
 		query = word_tokenize(query)
-		query = [word.lower() for word in query if word not in english_stopwords]
+		query = [word.lower() for word in query if word not in self.english_stopwords]
 
 		return query
 
 
 	def retrieve_query_results(self, query, topk=10):
-		query = process_query(query)
+		query = self.process_query(query)
 
 		if len(query) == 0:
 			return []
