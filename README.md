@@ -1,1 +1,1 @@
-This is the prototype of the grant search app.
+This repository consists of the source code for prototype of the Grant Search Application (GSApp). The code is built using Python3 programming languages and is based on deep learning models built built using PyTorch. It uses MongoDB as the database management system for storing the raw, pre-processed and post-processed text, describing clinical biomedical trials/experiments/studies.
