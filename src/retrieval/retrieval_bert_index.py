@@ -9,13 +9,14 @@ from pymongo import MongoClient
 from pytorch_pretrained_bert import BertTokenizer
 from models.bert_based.Models import BERTCLassifierModel
 from utils.NNSearch import NNSearch
+from pytorch_pretrained_bert import BertModel
 
 class RetrieveBertIndex:
 	def __init__(self):
 		# load pre-trained model tokenizer (vocabulary)
 		self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', max_len=512)
 
-		# # create the vocabulary of mesh terms
+		# create the vocabulary of mesh terms
 		# with open('../data/mesh_to_idx.pkl', 'rb') as fread:
 		# 	mesh_to_idx = pickle.load(fread)
 		
@@ -24,7 +25,7 @@ class RetrieveBertIndex:
 		# 	mesh_vocab[idx] = mesh
 
 		# setting model parameters
-		self.n_tgt_vocab = len(mesh_to_idx)
+		# self.n_tgt_vocab = len(mesh_to_idx)
 		self.max_seq_len = 512
 		self.d_word_vec = 200
 		self.dropout = 0.1
@@ -33,9 +34,11 @@ class RetrieveBertIndex:
 		self.nn_search = NNSearch('../processed_data/vector_representations/')
 
 		print ("Starting to load the saved model .....")
-		self.model = BERTCLassifierModel(self.n_tgt_vocab, dropout=self.dropout)
-		self.model.load_state_dict(torch.load('../saved_models/bert_based/model.pt'))
-		self.model.eval()
+		self.bert = BERTCLassifierModel(dropout=self.dropout)
+		# self.model.load_state_dict(torch.load('../saved_models/bert_based/model.pt'))
+		# self.bert = BertModel.from_pretrained('bert-base-uncased').cpu()
+		# self.bert.load_state_dict(torch.load('../saved_models/bert_based/bert_retrained_mesh_model.pt', map_location='cpu'))
+		self.bert.eval()
 		print ("Done loading the saved model .....")
 
 
@@ -54,17 +57,18 @@ class RetrieveBertIndex:
 		X = np.vstack(X)
 		Mask = np.vstack(Mask)
 
-		X = torch.tensor(X)
-		Mask = torch.tensor(Mask)
+		X = torch.tensor(X, dtype=torch.long)
+		Mask = torch.tensor(Mask, dtype=torch.long)
+		# print(X.dtype, Mask.dtype)
 
-		_, encoder_output = model(X, Mask)
+		encoder_output = self.bert(X, Mask)
 		encoder_output = encoder_output.data.numpy()
 
 		return encoder_output[0]
 
 	def retrieve_query_results(self, query, topk=10):
-		qu_bert_vec = self.extract_bert_vector([query])
-		nn_result = self.extract_nearest_neighbours(qu_bert_vec, topk=topk)
+		qu_bert_vec = self.extract_query_vector([query])
+		nn_result = self.nn_search.extract_nearest_neighbours(qu_bert_vec, topk=topk)
 
 		return nn_result
 
