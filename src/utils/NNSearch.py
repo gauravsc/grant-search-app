@@ -38,11 +38,11 @@ class NNSearch:
 			records = json.load(open(self.path+file,'r'))
 			for record in records:
 				print (record['table'], record['_id'])
-				# cand_vector = np.array(record['representation'])
+				cand_vector = np.array(record['representation'])
 				# # print ("query: ", query_vector[0:10])
 				# # print ("candidate vector: ", cand_vector[0:10])
-				# sim = self.cosine(cand_vector, query_vector)
-				# cand_triplet = (record['table'], record['_id'], sim)
-				# best_results = self.add_to_results(best_results, cand_triplet, topk)
+				sim = self.cosine(cand_vector, query_vector)
+				cand_triplet = (record['table'], record['_id'], sim)
+				best_results = self.add_to_results(best_results, cand_triplet, topk)
 		
 		return best_results
