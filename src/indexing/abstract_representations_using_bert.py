@@ -49,7 +49,7 @@ def extract_vector_representations(model, data, tokenizer):
 		rec = {}
 		rec['table'] = row['table']
 		rec['_id'] = row['_id']
-		rec['representation'] = encoder_output[idx, :].tolist()
+		rec['representation'] = list(encoder_output[idx, :].tolist())
 		# print (rec['table'], rec['_id'], row['table'], row['_id'])
 		records.append(rec)
 

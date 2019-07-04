@@ -6,7 +6,7 @@ import os
 import json
 
 # global parametes
-dim_lsh = 10
+dim_lsh = 6
 path_to_vecs = '../processed_data/vector_representations/'
 
 # set random seed

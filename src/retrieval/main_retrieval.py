@@ -7,7 +7,7 @@ if __name__ == '__main__':
 	query = "psychosocial experiences of women with breast cancer across the lifespan"
 
 	# res_inv_idx = retr_inv_idx.retrieve_query_results(query, topk=5)
-	res_bert_idx = retr_bert_idx.retrieve_query_results(query, topk=50)
+	res_bert_idx = retr_bert_idx.retrieve_query_results(query, topk=10)
 
 	# print ("results of inverted index query: ", res_inv_idx)
 	print ("results of bert index query: ", res_bert_idx) 

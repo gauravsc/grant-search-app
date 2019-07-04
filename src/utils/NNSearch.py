@@ -1,48 +1,65 @@
 import json
 import os
+import random as rd
 import numpy as np
+import pymongo
+from pymongo import MongoClient
 
+# set global params
+dim_lsh = 6
+
+# set random seed
+rd.seed(9001)
+np.random.seed(9001)
 
 class NNSearch:
 	def __init__(self, path):
-		self.path = path
+		# Establishing database connection
+		client = MongoClient('localhost', 27017)
+		db = client['grant_search']
+		self.collection_bert_lhs = db['bert_lhs_index']
+		
+		# generate 25 random vectors
+		self.rand_mat = np.random.standard_normal((dim_lsh, 768))
 
 	# small func to compute cosine similarity between two vectors
 	def cosine(self, vec1, vec2):
 		return np.dot(vec1, vec2)/(np.linalg.norm(vec1)*np.linalg.norm(vec2))
 
-	# func to maintain a list of topK results sorted by similarity scores
-	def add_to_results(self, best_results, cand_triplet, topk):
-		if len(best_results) == 0:
-			best_results = [cand_triplet]
-
-		elif len(best_results) < topk:
-			for i in range(len(best_results)):
-				if best_results[i][2] < cand_triplet[2]:
-					break
-			best_results = best_results[0:i] + [cand_triplet] + best_results[i:]
-		else:
-			for i in range(len(best_results)):
-				if best_results[i][2] < cand_triplet[2]:
-					break
-				best_results = best_results[0:i] + [cand_triplet] + best_results[i:-1]
-
-		return best_results
-
-
-	# extract the nearest neighbours using brute force, must be changed later
+	# extract the top-k records based on cosine similarity score	
 	def extract_nearest_neighbours(self, query_vector, topk=10):
 		query_vector = np.array(query_vector)
-		files = os.listdir(self.path); best_results = []
-		for file in files[0:1]:
-			records = json.load(open(self.path+file,'r'))
-			for record in records:
-				print (record['table'], record['_id'])
-				cand_vector = np.array(record['representation'])
-				# # print ("query: ", query_vector[0:10])
-				# # print ("candidate vector: ", cand_vector[0:10])
-				sim = self.cosine(cand_vector, query_vector)
-				cand_triplet = (record['table'], record['_id'], sim)
-				best_results = self.add_to_results(best_results, cand_triplet, topk)
-		
-		return best_results
+
+		# estimate which bucket the document will fall into
+		lsh_vec = np.dot(self.rand_mat, query_vector)
+		lsh_vec[lsh_vec<0] = 0
+		lsh_vec[lsh_vec>0] = 1
+		lsh_vec = map(str, map(int, lsh_vec))
+		bucket = int(''.join(lsh_vec),2)
+
+		# retrieve all the documents that are in the same bucket
+		records = self.collection_bert_lhs.find({"bucket": bucket})
+
+		top_results = []
+		for record in records:
+			# print (record['vector'])
+			cand_vector = np.array(record['vector'])
+			sim = self.cosine(cand_vector, query_vector)
+			cand_triplet = (record['table'], record['original_id'], sim)
+
+			# put the record in the right position
+			if len(top_results) == 0:
+				top_results = [cand_triplet]
+
+			elif len(top_results) < topk:
+				for i in range(len(top_results)):
+					if top_results[i][2] < cand_triplet[2]:
+						break
+				top_results = top_results[0:i] + [cand_triplet] + top_results[i:]
+			else:
+				for i in range(len(top_results)):
+					if top_results[i][2] < cand_triplet[2]:
+						break
+				top_results = top_results[0:i] + [cand_triplet] + top_results[i:-1]
+			
+		return top_results
