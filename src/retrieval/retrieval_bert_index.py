@@ -15,17 +15,6 @@ class RetrieveBertIndex:
 	def __init__(self):
 		# load pre-trained model tokenizer (vocabulary)
 		self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', max_len=512)
-
-		# create the vocabulary of mesh terms
-		# with open('../data/mesh_to_idx.pkl', 'rb') as fread:
-		# 	mesh_to_idx = pickle.load(fread)
-		
-		# mesh_vocab = [" "] * len(mesh_to_idx)
-		# for mesh, idx in mesh_to_idx.items():
-		# 	mesh_vocab[idx] = mesh
-
-		# setting model parameters
-		# self.n_tgt_vocab = len(mesh_to_idx)
 		self.max_seq_len = 512
 		self.d_word_vec = 200
 		self.dropout = 0.1
