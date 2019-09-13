@@ -20,30 +20,14 @@ def create_index(abstract_text, _id, table_name, merged_dict):
 	return merged_dict
 
 
-def update_inverted_index(collection_index, temp_inv_idx):
-	words_to_update = temp_inv_idx.keys()
+def update_inverted_index(collection_index, merged_dict):
+	words_to_update = merged_dict.keys()
 	docs_to_insert = []
 	for word in words_to_update:
-		docs_to_insert.append({'word':word, 'index_list':temp_inv_idx[word]})
+		docs_to_insert.append({'word':word, 'index_list':merged_dict[word]})
 	
 	collection_index.insert_many(docs_to_insert)
 		
-
-# def merge_dictinaries(dict1, dict2):
-# 	dict_merged = {}
-# 	for key in dict1.keys():
-# 		if key in dict2:
-# 			dict_merged[key] = dict1[key] + dict2[key]
-# 		else:
-# 			dict_merged[key] = dict1[key]
-
-# 	for key in dict2.keys():
-# 		if key in dict1:
-# 			dict_merged[key] = dict1[key] + dict2[key]
-# 		else:
-# 			dict_merged[key] = dict2[key]
-
-# 	return dict_merged
 
 
 def index_pubmed_text(db, collection_index):
